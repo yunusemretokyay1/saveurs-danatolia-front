@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import { useState } from "react";
 import GoogleIcon from "@/components/icons/GoogleIcon";
 import MyOrders from "@/components/MyOrders";
+import Link from "next/link"; // Next.js'den Link bileşenini import ediyoruz
 
 const StyledAccountPage = styled.div`
   padding: 20px;
@@ -156,6 +157,10 @@ export default function AccountPage() {
                     <>
                         <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
                         <MyOrders email={email} />
+                        {/* WishlistPage'e yönlendiren bağlantı */}
+                        <Link href="/wishlist" style={{ marginTop: '20px' }}>
+                            <Button>Go to Wishlist</Button>
+                        </Link>
                     </>
                 ) : (
                     <>

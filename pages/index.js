@@ -1,17 +1,25 @@
+// pages/index.js
+import { useState } from 'react';
 import Header from "@/components/Header";
 import Featured from "@/components/Featured";
+import NewProducts from "@/components/NewProducts";
+import ServiceModal from "@/components/ServiceModal";
 import { Product } from "@/models/Product";
 import { mongooseConnect } from "@/lib/mongoose";
-import NewProducts from "@/components/NewProducts";
-
 
 export default function HomePage({ featuredProduct, newProducts }) {
+  const [isModalOpen, setModalOpen] = useState(false); // State to manage modal visibility
+
+  const toggleModal = () => {
+    setModalOpen(true); // Open the modal when button is clicked
+  };
+
   return (
     <div>
       <Header />
       <Featured product={featuredProduct} />
-      <NewProducts products={newProducts} />
-
+      <NewProducts products={newProducts} onButtonClick={toggleModal} /> {/* Pass the function to NewProducts */}
+      <ServiceModal isOpen={isModalOpen} onRequestClose={() => setModalOpen(false)} /> {/* Modal component */}
     </div>
   );
 }

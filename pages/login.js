@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import styles from './LoginPage.module.css';  // Import the CSS Module
 
 export default function LoginPage() {
     const router = useRouter();
@@ -19,7 +20,6 @@ export default function LoginPage() {
         });
 
         if (res.ok) {
-
             router.push('/account');
         } else {
             const { message } = await res.json();
@@ -28,12 +28,13 @@ export default function LoginPage() {
     };
 
     return (
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleLogin} className={styles.form}>
             <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email"
+                className={styles.input}  // Apply the CSS class
                 required
             />
             <input
@@ -41,10 +42,11 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
+                className={styles.input}  // Apply the CSS class
                 required
             />
-            <button type="submit">Login</button>
-            {error && <p>{error}</p>}
+            <button type="submit" className={styles.button}>Login</button>
+            {error && <p className={styles.error}>{error}</p>}
         </form>
     );
 }

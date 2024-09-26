@@ -7,7 +7,8 @@ import Center from "@/components/Center";
 import SearchBar from "@/components/SearchBar";
 import { Logo as LogoComponent } from "@/components/Logo/Logo";
 import { useRouter } from 'next/router';
-import CartIcon from "@/components/icons/CartIcon";
+import Basket from "@/components/icons/Basket";
+
 
 const StyledHeader = styled.header`
   background-color: #222;
@@ -19,7 +20,7 @@ const Logo = styled(Link)`
   text-decoration: none;
   position: relative;
   z-index: 3;
-  flex-grow: 1;
+  flex-grow: 2;
   display: flex; 
   justify-content: center; 
 `;
@@ -107,10 +108,10 @@ export default function Header() {
             <SearchBar />
 
             <NavLink href="/">Home</NavLink>
-            <NavLink href="/products">All products</NavLink>
+            <NavLink href="/products">Products</NavLink>
             <NavLink href="/categories">Categories</NavLink>
             <NavLink href="/account">Account</NavLink>
-            <NavLink href="/cart"><CartIcon />Cart ({cartProducts.length})</NavLink>
+            <NavLink href="/cart"><Basket /> ({cartProducts.length})</NavLink>
           </StyledNav>
           <NavButton onClick={() => setMobileNavActive(prev => !prev)}>
             <BarsIcon />

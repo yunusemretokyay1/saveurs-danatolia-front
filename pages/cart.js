@@ -7,6 +7,7 @@ import { CartContext } from "@/components/CartContext";
 import axios from "axios";
 import Table from "@/components/Table";
 import Input from "@/components/Input";
+import ServiceModal from "@/components/ServiceModal";
 
 const ColumnsWrapper = styled.div`
   display: grid;
@@ -76,6 +77,8 @@ export default function CartPage() {
   const [streetAddress, setStreetAddress] = useState('');
   const [country, setCountry] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Added state for modal
+  const [selectedService, setSelectedService] = useState(null); // Added state for selected service
 
   useEffect(() => {
     if (cartProducts.length > 0) {
@@ -117,8 +120,8 @@ export default function CartPage() {
     });
 
     if (response.data.url) {
-      clearCart(); // Sepeti boşalt
-      window.location = response.data.url; // Ödeme sayfasına yönlendir
+      clearCart(); // Clear cart
+      window.location = response.data.url; // Redirect to payment page
     }
   }
 
@@ -136,7 +139,7 @@ export default function CartPage() {
           <ColumnsWrapper>
             <Box>
               <h1>Thanks for your order!</h1>
-              <p>We will email you when your order will be sent.</p>
+              <p>We will email you when your order is sent.</p>
             </Box>
           </ColumnsWrapper>
         </Center>
@@ -174,16 +177,14 @@ export default function CartPage() {
                         {product.title}
                       </ProductInfoCell>
                       <td>
-                        <Button
-                          onClick={() => lessOfThisProduct(product._id)}>-</Button>
+                        <Button onClick={() => lessOfThisProduct(product._id)}>-</Button>
                         <QuantityLabel>
                           {cartProducts.filter(id => id === product._id).length}
                         </QuantityLabel>
-                        <Button
-                          onClick={() => moreOfThisProduct(product._id)}>+</Button>
+                        <Button onClick={() => moreOfThisProduct(product._id)}>+</Button>
                       </td>
                       <td>
-                        ${cartProducts.filter(id => id === product._id).length * product.price}
+                        €{cartProducts.filter(id => id === product._id).length * product.price}
                       </td>
                       <td>
                         <Button onClick={() => removeItemFromCart(product._id)}>Remove</Button>
@@ -193,7 +194,7 @@ export default function CartPage() {
                   <tr>
                     <td></td>
                     <td></td>
-                    <td>${total}</td>
+                    <td>€{total.toFixed(2)}</td>
                   </tr>
                 </tbody>
               </Table>
@@ -201,7 +202,10 @@ export default function CartPage() {
           </Box>
           {!!cartProducts?.length && (
             <Box>
-              <h2>Order information</h2>
+              <Button black block onClick={() => setIsModalOpen(true)}>
+                Select Service
+              </Button>
+              <h2>Order Information</h2>
               <Input type="text"
                 placeholder="Name"
                 value={name}
@@ -238,10 +242,14 @@ export default function CartPage() {
                 onClick={goToPayment}>
                 Continue to payment
               </Button>
-              <Button red block onClick={clearCart}>Clear Cart</Button>
             </Box>
           )}
         </ColumnsWrapper>
+        <ServiceModal
+          isOpen={isModalOpen}
+          onRequestClose={() => setIsModalOpen(false)}
+          onServiceSelect={setSelectedService} // Set selected service
+        />
       </Center>
     </>
   );
