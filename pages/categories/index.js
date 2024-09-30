@@ -1,4 +1,3 @@
-import Header from "@/components/Header";
 import Center from "@/components/Center";
 import Title from "@/components/Title";
 import { mongooseConnect } from "@/lib/mongoose";
@@ -21,7 +20,7 @@ const CategoryWrapper = styled.div`
 export default function CategoriesPage({ categories }) {
     return (
         <>
-            <Header />
+
             <Center>
                 {categories.map((category) => (
                     <CategoryWrapper key={category._id}>

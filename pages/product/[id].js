@@ -83,7 +83,7 @@ export default function ProductPage({ product, comments }) {
 
   return (
     <>
-      <Header />
+
       <CenterContainer>
         <ColWrapper>
           <WhiteBox>
@@ -107,7 +107,7 @@ export default function ProductPage({ product, comments }) {
                   value={quantity}
                   onChange={handleQuantityChange}
                 />
-                <Button primary onClick={() => addProduct(product._id, quantity)}>
+                <Button primary outline onClick={() => addProduct(product._id, quantity)}>
                   <CartIcon /> Add to cart
                 </Button>
               </div>
@@ -116,6 +116,7 @@ export default function ProductPage({ product, comments }) {
           </div>
         </ColWrapper>
       </CenterContainer>
+
     </>
   );
 }

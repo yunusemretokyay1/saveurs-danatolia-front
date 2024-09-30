@@ -1,4 +1,32 @@
 import { useEffect, useState } from "react";
+import styled from "styled-components"; // Import styled-components
+
+const OrdersContainer = styled.div`
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+`;
+
+const OrderItem = styled.div`
+  border-bottom: 1px solid #ddd;
+  padding: 10px 0;
+
+  &:last-child {
+    border-bottom: none; // Remove the bottom border for the last item
+  }
+`;
+
+const LoadingMessage = styled.p`
+  color: #4caf50; // Green color for loading
+  font-size: 16px;
+`;
+
+const ErrorMessage = styled.p`
+  color: red; // Red color for errors
+  font-size: 16px;
+`;
 
 const MyOrders = ({ email }) => {
     const [orders, setOrders] = useState([]);
@@ -26,18 +54,18 @@ const MyOrders = ({ email }) => {
         }
     }, [email]);
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Error: {error}</p>;
+    if (loading) return <LoadingMessage>Loading...</LoadingMessage>;
+    if (error) return <ErrorMessage>Error: {error}</ErrorMessage>;
 
     return (
-        <div>
+        <OrdersContainer>
             <h2>My Orders</h2>
             {orders.length === 0 ? (
                 <p>No orders found.</p>
             ) : (
                 <ul>
                     {orders.map((order) => (
-                        <li key={order._id}>
+                        <OrderItem key={order._id}>
                             <p><strong>Name:</strong> {order.name}</p>
                             <p><strong>City:</strong> {order.city}</p>
                             <p><strong>Postal Code:</strong> {order.postalCode}</p>
@@ -51,11 +79,11 @@ const MyOrders = ({ email }) => {
                                     </li>
                                 ))}
                             </ul>
-                        </li>
+                        </OrderItem>
                     ))}
                 </ul>
             )}
-        </div>
+        </OrdersContainer>
     );
 };
 

@@ -1,5 +1,6 @@
+// pages/api/updateUser.js
 import { mongooseConnect } from "@/lib/mongoose";
-import { User } from "@/models/User";
+import User from "@/models/User";
 import bcrypt from 'bcrypt';
 
 export default async function handler(req, res) {
@@ -9,9 +10,7 @@ export default async function handler(req, res) {
         const { email, name, password } = req.body;
 
         try {
-
             const hashedPassword = await bcrypt.hash(password, 10);
-
 
             const updatedUser = await User.findOneAndUpdate(
                 { email },

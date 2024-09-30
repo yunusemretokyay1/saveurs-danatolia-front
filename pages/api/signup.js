@@ -1,30 +1,27 @@
-import { mongooseConnect } from "@/lib/mongoose";
-import User from '../../models/User';
-import bcrypt from 'bcrypt';
+// pages/api/signup.js
+import { hash } from "bcryptjs";
+import { connectToDatabase } from "@/lib/mongodb"; // MongoDB connection
 
 export default async function handler(req, res) {
-    await mongooseConnect();
-
-    if (req.method === 'POST') {
-        const { name, email, password } = req.body;
+    if (req.method === "POST") {
+        const { email, password } = req.body;
 
         try {
-            const existingUser = await User.findOne({ email });
-            if (existingUser) {
-                return res.status(409).json({ message: 'A user with this email already exists' });
-            }
+            const { db } = await connectToDatabase();
+            const hashedPassword = await hash(password, 10); // Hash the password
 
-            const hashedPassword = await bcrypt.hash(password, 10);
-            const user = new User({ name, email, password: hashedPassword });
-            await user.save();
+            // Insert user into the database
+            await db.collection("users").insertOne({
+                email,
+                password: hashedPassword,
+            });
 
-            return res.status(201).json({ message: 'Registration successful!' });
+            res.status(201).json({ message: "User created successfully!" });
         } catch (error) {
-            console.error(error);
-            return res.status(500).json({ message: 'Registration error', error });
+            res.status(500).json({ message: "Error creating user", error: error.message });
         }
     } else {
-        res.setHeader('Allow', ['POST']);
-        return res.status(405).end(`Method ${req.method} not allowed`);
+        res.setHeader("Allow", ["POST"]);
+        res.status(405).end(`Method ${req.method} Not Allowed`);
     }
 }

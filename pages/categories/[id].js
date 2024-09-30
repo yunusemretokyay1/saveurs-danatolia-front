@@ -1,4 +1,3 @@
-import Header from "@/components/Header";
 import Center from "@/components/Center";
 import Title from "@/components/Title";
 import { mongooseConnect } from "@/lib/mongoose";
@@ -17,7 +16,7 @@ const ProductsList = styled.div`
 export default function CategoryPage({ category, products }) {
     return (
         <>
-            <Header />
+
             <Center>
                 <Title>{category.name}</Title>
                 <p>{category.description}</p>

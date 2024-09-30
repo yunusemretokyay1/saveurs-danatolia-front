@@ -1,8 +1,7 @@
-import Header from "@/components/Header";
-import styled from "styled-components";
+import React, { useContext, useEffect, useState } from 'react';
+import styled from 'styled-components';
 import Center from "@/components/Center";
 import Button from "@/components/Button";
-import { useContext, useEffect, useState } from "react";
 import { CartContext } from "@/components/CartContext";
 import axios from "axios";
 import Table from "@/components/Table";
@@ -13,7 +12,7 @@ const ColumnsWrapper = styled.div`
   display: grid;
   grid-template-columns: 1fr;
   @media screen and (min-width: 768px) {
-    grid-template-columns: 1.2fr .8fr;
+    grid-template-columns: 1.2fr 0.8fr;
   }
   gap: 40px;
   margin-top: 40px;
@@ -38,14 +37,17 @@ const ProductImageBox = styled.div`
   align-items: center;
   justify-content: center;
   border-radius: 10px;
+
   img {
     max-width: 60px;
     max-height: 60px;
   }
+
   @media screen and (min-width: 768px) {
     padding: 10px;
     width: 100px;
     height: 100px;
+
     img {
       max-width: 80px;
       max-height: 80px;
@@ -56,6 +58,7 @@ const ProductImageBox = styled.div`
 const QuantityLabel = styled.span`
   padding: 0 15px;
   display: block;
+
   @media screen and (min-width: 768px) {
     display: inline-block;
     padding: 0 10px;
@@ -77,8 +80,23 @@ export default function CartPage() {
   const [streetAddress, setStreetAddress] = useState('');
   const [country, setCountry] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Added state for modal
-  const [selectedService, setSelectedService] = useState(null); // Added state for selected service
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState(null);
+  const [selectedDateTime, setSelectedDateTime] = useState({ date: null, time: '' });
+  const [shippingCost, setShippingCost] = useState(0);
+
+  useEffect(() => {
+    const fetchShippingCost = async () => {
+      try {
+        const response = await axios.get('/api/settings');
+        setShippingCost(response.data.shippingLimit);
+      } catch (error) {
+        console.error('Erreur lors de la récupération du coût d\'expédition :', error);
+      }
+    };
+
+    fetchShippingCost();
+  }, []);
 
   useEffect(() => {
     if (cartProducts.length > 0) {
@@ -98,32 +116,55 @@ export default function CartPage() {
     if (window?.location.href.includes('success')) {
       setIsSuccess(true);
       clearCart();
+      console.log('Panier vidé après la commande réussie');
     }
   }, []);
 
-  function moreOfThisProduct(id) {
+  const moreOfThisProduct = (id) => {
     addProduct(id);
-  }
+  };
 
-  function lessOfThisProduct(id) {
+  const lessOfThisProduct = (id) => {
     removeProduct(id);
-  }
+  };
 
-  function removeItemFromCart(id) {
+  const removeItemFromCart = (id) => {
     setCartProducts(cartProducts.filter(productId => productId !== id));
-  }
+  };
 
-  async function goToPayment() {
-    const response = await axios.post('/api/checkout', {
-      name, email, city, postalCode, streetAddress, country,
-      cartProducts,
-    });
-
-    if (response.data.url) {
-      clearCart(); // Clear cart
-      window.location = response.data.url; // Redirect to payment page
+  const goToPayment = async () => {
+    if (!selectedDateTime.date || !selectedDateTime.time) {
+      alert("Veuillez sélectionner une date et une heure.");
+      return;
     }
-  }
+
+    const [hours, minutes] = selectedDateTime.time.split(':').map(Number);
+    const fullDateTime = new Date(selectedDateTime.date);
+    fullDateTime.setHours(hours);
+    fullDateTime.setMinutes(minutes);
+
+    try {
+      const response = await axios.post('/api/checkout', {
+        name,
+        email,
+        city,
+        postalCode,
+        streetAddress,
+        country,
+        cartProducts,
+        service: selectedService?.service,
+        location: selectedService?.location,
+        dateTime: fullDateTime.toISOString(),
+      });
+
+      if (response.data.url) {
+        clearCart();
+        window.location = response.data.url;
+      }
+    } catch (error) {
+      console.error('Erreur de paiement :', error);
+    }
+  };
 
   let total = 0;
   for (const productId of cartProducts) {
@@ -131,126 +172,130 @@ export default function CartPage() {
     total += price;
   }
 
+  total += shippingCost;
+
   if (isSuccess) {
     return (
-      <>
-        <Header />
-        <Center>
-          <ColumnsWrapper>
-            <Box>
-              <h1>Thanks for your order!</h1>
-              <p>We will email you when your order is sent.</p>
-            </Box>
-          </ColumnsWrapper>
-        </Center>
-      </>
+      <Center>
+        <ColumnsWrapper>
+          <Box>
+            <h1>Merci pour votre commande !</h1>
+            <p>Nous vous enverrons un email lorsque votre commande sera expédiée.</p>
+          </Box>
+        </ColumnsWrapper>
+      </Center>
     );
   }
 
   return (
-    <>
-      <Header />
-      <Center>
-        <ColumnsWrapper>
-          <Box>
-            <h2>Cart</h2>
-            {!cartProducts?.length && (
-              <div>Your cart is empty</div>
-            )}
-            {products?.length > 0 && (
-              <Table>
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Actions</th>
+    <Center>
+      <ColumnsWrapper>
+        <Box>
+          <h2>Panier</h2>
+          {!cartProducts.length && <div>Votre panier est vide</div>}
+          {products.length > 0 && (
+            <Table>
+              <thead>
+                <tr>
+                  <th>Produit</th>
+                  <th>Quantité</th>
+                  <th>Prix</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map(product => (
+                  <tr key={product._id}>
+                    <ProductInfoCell>
+                      <ProductImageBox>
+                        <img src={product.images[0]} alt={product.title} />
+                      </ProductImageBox>
+                      {product.title}
+                    </ProductInfoCell>
+                    <td>
+                      <Button onClick={() => lessOfThisProduct(product._id)}>-</Button>
+                      <QuantityLabel>
+                        {cartProducts.filter(id => id === product._id).length}
+                      </QuantityLabel>
+                      <Button onClick={() => moreOfThisProduct(product._id)}>+</Button>
+                    </td>
+                    <td>
+                      €{cartProducts.filter(id => id === product._id).length * product.price}
+                    </td>
+                    <td>
+                      <Button onClick={() => removeItemFromCart(product._id)}>Supprimer</Button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {products.map(product => (
-                    <tr key={product._id}>
-                      <ProductInfoCell>
-                        <ProductImageBox>
-                          <img src={product.images[0]} alt="" />
-                        </ProductImageBox>
-                        {product.title}
-                      </ProductInfoCell>
-                      <td>
-                        <Button onClick={() => lessOfThisProduct(product._id)}>-</Button>
-                        <QuantityLabel>
-                          {cartProducts.filter(id => id === product._id).length}
-                        </QuantityLabel>
-                        <Button onClick={() => moreOfThisProduct(product._id)}>+</Button>
-                      </td>
-                      <td>
-                        €{cartProducts.filter(id => id === product._id).length * product.price}
-                      </td>
-                      <td>
-                        <Button onClick={() => removeItemFromCart(product._id)}>Remove</Button>
-                      </td>
-                    </tr>
-                  ))}
-                  <tr>
-                    <td></td>
-                    <td></td>
-                    <td>€{total.toFixed(2)}</td>
-                  </tr>
-                </tbody>
-              </Table>
-            )}
-          </Box>
-          {!!cartProducts?.length && (
-            <Box>
-              <Button black block onClick={() => setIsModalOpen(true)}>
-                Select Service
-              </Button>
-              <h2>Order Information</h2>
-              <Input type="text"
-                placeholder="Name"
-                value={name}
-                name="name"
-                onChange={ev => setName(ev.target.value)} />
-              <Input type="text"
-                placeholder="Email"
-                value={email}
-                name="email"
-                onChange={ev => setEmail(ev.target.value)} />
-              <CityHolder>
-                <Input type="text"
-                  placeholder="City"
-                  value={city}
-                  name="city"
-                  onChange={ev => setCity(ev.target.value)} />
-                <Input type="text"
-                  placeholder="Postal Code"
-                  value={postalCode}
-                  name="postalCode"
-                  onChange={ev => setPostalCode(ev.target.value)} />
-              </CityHolder>
-              <Input type="text"
-                placeholder="Street Address"
-                value={streetAddress}
-                name="streetAddress"
-                onChange={ev => setStreetAddress(ev.target.value)} />
-              <Input type="text"
-                placeholder="Country"
-                value={country}
-                name="country"
-                onChange={ev => setCountry(ev.target.value)} />
-              <Button black block
-                onClick={goToPayment}>
-                Continue to payment
-              </Button>
-            </Box>
+                ))}
+                <tr>
+                  <td></td>
+                  <td>Coût d'expédition :</td>
+                  <td>€{shippingCost.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td></td>
+                  <td>Total : €{total.toFixed(2)}</td>
+                </tr>
+              </tbody>
+            </Table>
           )}
-        </ColumnsWrapper>
-        <ServiceModal
-          isOpen={isModalOpen}
-          onRequestClose={() => setIsModalOpen(false)}
-          onServiceSelect={setSelectedService} // Set selected service
-        />
-      </Center>
-    </>
+          {cartProducts.length > 0 && (
+            <Button black onClick={clearCart} style={{ marginTop: '20px' }}>
+              Vider le panier
+            </Button>
+          )}
+        </Box>
+        {!!cartProducts.length && (
+          <Box>
+            <Button black block onClick={() => setIsModalOpen(true)}>
+              Sélectionner un service
+            </Button>
+            <h2>Informations de commande</h2>
+            <Input type="text"
+              placeholder="Nom"
+              value={name}
+              onChange={ev => setName(ev.target.value)} />
+            <Input type="text"
+              placeholder="Email"
+              value={email}
+              onChange={ev => setEmail(ev.target.value)} />
+            <CityHolder>
+              <Input type="text"
+                placeholder="Ville"
+                value={city}
+                onChange={ev => setCity(ev.target.value)} />
+              <Input type="text"
+                placeholder="Code postal"
+                value={postalCode}
+                onChange={ev => setPostalCode(ev.target.value)} />
+            </CityHolder>
+            <Input type="text"
+              placeholder="Adresse"
+              value={streetAddress}
+              onChange={ev => setStreetAddress(ev.target.value)} />
+            <Input type="text"
+              placeholder="Pays"
+              value={country}
+              onChange={ev => setCountry(ev.target.value)} />
+            <Button black block onClick={goToPayment}
+              disabled={!selectedService || !name || !email || !city || !postalCode || !streetAddress || !country}>
+              Continuer vers le paiement
+            </Button>
+          </Box>
+        )}
+      </ColumnsWrapper>
+      <ServiceModal
+        isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        onServiceSelect={service => {
+          setSelectedService(service);
+          setSelectedDateTime({
+            date: service.dateTime,
+            time: service.time
+          });
+        }}
+      />
+    </Center>
   );
 }

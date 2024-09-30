@@ -1,64 +1,71 @@
 import styled from "styled-components";
-import Center from "@/components/Center";
-import Header from "@/components/Header";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import GoogleIcon from "@/components/icons/GoogleIcon";
 import MyOrders from "@/components/MyOrders";
-import Link from "next/link"; // Next.js'den Link bileşenini import ediyoruz
+import Link from "next/link";
+import { useAuth } from "@/components/AuthContext";
 
+// Styled components for AccountPage
 const StyledAccountPage = styled.div`
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;  /* Use min-height instead of height */
   background-color: #f0f0f0;
 `;
 
-const Title = styled.h1`
-  font-size: 20px;
-  color: #333;
-  text-align: center;
+const PageContent = styled.div`
+  flex: 1;  /* This allows the content to grow and push the footer down */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
-const InfoSection = styled.div`
-  margin: 10px 0;
-  text-align: center;
-`;
-
-const InfoItem = styled.p`
-  color: #4caf50;
+const FormContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  max-width: 300px;
-  margin: 0 auto;
+  padding: 40px;
+  background-color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  max-width: 400px;
+  width: 100%;
 `;
 
 const Input = styled.input`
-  padding: 8px;
-  margin: 8px 0;
-  width: 100%;
-  border: 1px solid #ccc;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
   border-radius: 5px;
+  font-size: 16px;
+  outline: none;
 
   &:focus {
     border-color: #4caf50;
-    outline: none;
   }
 `;
 
 const Button = styled.button`
-  padding: 8px;
-  margin-top: 10px;
-  width: 100%;
   background-color: #0d3d29;
   color: white;
+  padding: 10px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 16px;
 
   &:hover {
     background-color: #0b3322;
+  }
+
+  &:disabled {
+    background-color: #ccc;
   }
 `;
 
@@ -66,170 +73,174 @@ const GoogleButton = styled(Button)`
   background-color: #db4437;
   display: flex;
   align-items: center;
-  width: 150px;   
-  height: 40px;   
-  border-radius: 5px; 
+  justify-content: center;
+  width: 100%;
+  height: 40px;
+  margin-top: 10px;
 `;
 
-const LogoutButton = styled.button`
-  padding: 8px;
-  margin-top: 20px;
+const LogoutButton = styled(Button)`
   background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+  margin-top: 20px;
 
   &:hover {
     background-color: #e53935;
   }
 `;
 
-const CenterContainer = styled(Center)`
-  padding-top: 80px;
+const LoadingMessage = styled.p`
+  color: #4caf50;
+  font-size: 14px;
+  margin-top: 10px;
+`;
+
+const ErrorMessage = styled.p`
+  color: red;
+  margin-top: 10px;
+  font-size: 14px;
 `;
 
 export default function AccountPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [name, setName] = useState('');
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [name, setName] = useState("");
     const [isLogin, setIsLogin] = useState(true);
-    const [welcomeMessage, setWelcomeMessage] = useState('');
+    const [welcomeMessage, setWelcomeMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const { user, setUser } = useAuth();
+
+    useEffect(() => {
+        if (user) {
+            setWelcomeMessage(`Welcome back, ${user.email}!`);
+        }
+    }, [user]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError("");
+
         const data = { email, password };
 
-        const response = await fetch('/api/login', {
-            method: 'POST',
+        const response = await fetch("/api/login", {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
             },
             body: JSON.stringify(data),
         });
 
+        setLoading(false);
+
         if (response.ok) {
             setWelcomeMessage(`Welcome back, ${name || email}!`);
-            console.log('Login successful!');
         } else {
-            console.error('Login error');
+            const { message } = await response.json();
+            setError(message || "Login error");
         }
     };
 
     const handleSignup = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError("");
+
         const data = { name, email, password };
 
-        const response = await fetch('/api/signup', {
-            method: 'POST',
+        const response = await fetch("/api/signup", {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
             },
             body: JSON.stringify(data),
         });
 
+        setLoading(false);
+
         if (response.ok) {
-            console.log('Signup successful!');
-            await handleLogin(e);
+            await handleLogin(e); // Login after signup
         } else {
-            console.error('Signup error');
+            const { message } = await response.json();
+            setError(message || "Signup error");
         }
     };
 
     const handleLogout = async () => {
-        const response = await fetch('/api/logout', {
-            method: 'POST',
+        const response = await fetch("/api/logout", {
+            method: "POST",
         });
 
         if (response.ok) {
-            setWelcomeMessage('');
-            console.log('Logout successful!');
+            setWelcomeMessage("");
         } else {
-            console.error('Logout error');
+            setError("Logout error");
         }
     };
 
     return (
         <StyledAccountPage>
-            <Header />
-            <CenterContainer>
+            <PageContent>
                 {welcomeMessage ? (
-                    <>
+                    <FormContainer>
+                        <h2>{welcomeMessage}</h2>
                         <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
                         <MyOrders email={email} />
-                        {/* WishlistPage'e yönlendiren bağlantı */}
-                        <Link href="/wishlist" style={{ marginTop: '20px' }}>
-                            <Button>Go to Wishlist</Button>
+                        <Link href="/wishlist" passHref>
+                            <Button style={{ marginTop: "20px" }}>Go to Wishlist</Button>
                         </Link>
-                    </>
+                    </FormContainer>
                 ) : (
-                    <>
-                        <Title>{isLogin ? 'Login' : 'Sign Up'}</Title>
-                        {welcomeMessage && (
-                            <InfoSection>
-                                <InfoItem>{welcomeMessage}</InfoItem>
-                            </InfoSection>
+                    <Form onSubmit={isLogin ? handleLogin : handleSignup}>
+                        <h2>{isLogin ? "Login" : "Sign Up"}</h2>
+                        <Input
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                        <Input
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                        {!isLogin && (
+                            <Input
+                                type="text"
+                                placeholder="Name"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                            />
                         )}
-                        <Form onSubmit={isLogin ? handleLogin : handleSignup}>
-                            {isLogin ? (
-                                <>
-                                    <Input
-                                        type="email"
-                                        placeholder="Email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        required
-                                    />
-                                    <Input
-                                        type="password"
-                                        placeholder="Password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                    />
-                                    <Button type="submit">Login</Button>
-                                    <GoogleButton type="button" onClick={() => console.log('Google Login')}>
-                                        <GoogleIcon style={{ width: '10px', marginRight: '10px' }} />
-                                        Google Login
-                                    </GoogleButton>
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsLogin(false)}
-                                        style={{ marginTop: '10px' }}
-                                    >
-                                        Don't have an account? Sign up
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <Input
-                                        type="text"
-                                        placeholder="Name"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        required
-                                    />
-                                    <Input
-                                        type="email"
-                                        placeholder="Email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        required
-                                    />
-                                    <Input
-                                        type="password"
-                                        placeholder="Password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                    />
-                                    <Button type="submit">Register</Button>
-                                </>
-                            )}
-                        </Form>
-                    </>
+                        <Button type="submit" disabled={loading}>
+                            {loading
+                                ? isLogin
+                                    ? "Logging in..."
+                                    : "Signing up..."
+                                : isLogin
+                                    ? "Login"
+                                    : "Sign Up"}
+                        </Button>
+                        <GoogleButton onClick={() => console.log("Google Login")}>
+                            <GoogleIcon style={{ width: "20px", marginRight: "10px" }} />
+                            Google Login
+                        </GoogleButton>
+                        <button
+                            type="button"
+                            onClick={() => setIsLogin(!isLogin)}
+                            style={{ marginTop: "10px", background: "none", border: "none", cursor: "pointer" }}
+                        >
+                            {isLogin ? "Don't have an account? Sign up" : "Already have an account? Login"}
+                        </button>
+                        {error && <ErrorMessage>{error}</ErrorMessage>}
+                        {loading && <LoadingMessage>Processing, please wait...</LoadingMessage>}
+                    </Form>
                 )}
-            </CenterContainer>
+            </PageContent>
         </StyledAccountPage>
     );
 }

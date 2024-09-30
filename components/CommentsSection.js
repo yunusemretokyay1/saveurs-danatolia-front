@@ -70,9 +70,9 @@ const CommentsSection = ({ productId, comments }) => {
                             <Rating rating={comments[0].rating} />
                         </CommentWrapper>
                     )}
-                    <ShowCommentsButton onClick={toggleShowComments}>
+                    <Button primary outine onClick={toggleShowComments}>
                         {showAllComments ? 'Hide Comments' : 'Show Comments'}
-                    </ShowCommentsButton>
+                    </Button>
                 </>
             )}
             <InputWrapper>
@@ -83,7 +83,7 @@ const CommentsSection = ({ productId, comments }) => {
                     onChange={(e) => setNewComment(e.target.value)}
                 />
                 <Rating onRate={setRating} rating={rating} />
-                <Button primary onClick={handleCommentSubmit}>Submit Comment</Button>
+                <Button primary outline onClick={handleCommentSubmit}>Submit Comment</Button>
             </InputWrapper>
         </div>
     );

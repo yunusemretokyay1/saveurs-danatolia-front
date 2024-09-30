@@ -1,4 +1,3 @@
-import Header from "@/components/Header";
 import styled from "styled-components";
 import Center from "@/components/Center";
 import { mongooseConnect } from "@/lib/mongoose";
@@ -10,7 +9,7 @@ import Title from "@/components/Title";
 import { useState } from "react";
 
 const PageContainer = styled.div`
-  padding: 20px;
+  padding: 0;
 `;
 
 const CenterContainer = styled(Center)`
@@ -63,7 +62,7 @@ export default function ProductsPage({ products, categories, ratings }) {
 
   return (
     <PageContainer>
-      <Header />
+
       <CenterContainer>
         <Title>All Products</Title>
 
