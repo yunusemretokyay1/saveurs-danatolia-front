@@ -73,7 +73,7 @@ const ServiceModal = ({ isOpen, onRequestClose, onServiceSelect }) => {
 
   const handleServiceSelect = (service) => {
     if (!dateTime || !time || !location) {
-      alert("Please select a date, time, and location.");
+      alert("Veuillez sélectionner une date, une heure et un emplacement.");
       return; // Tarih, saat veya lokasyon seçilmemişse uyarı göster
     }
 
@@ -88,13 +88,13 @@ const ServiceModal = ({ isOpen, onRequestClose, onServiceSelect }) => {
 
   return (
     <StyledModal isOpen={isOpen} onRequestClose={onRequestClose}>
-      <h2>Select a Service</h2>
+      <h2>Sélectionnez un service</h2>
 
       {/* Lokasyon Seçimi */}
       <LocationSelect value={location} onChange={(e) => setLocation(e.target.value)}>
         <option value="">Sélectionnez un emplacement</option>
         <option value="Thonon-les-Bains">Thonon-les-Bains</option>
-        <option value="Evian-les-Bains">Evian-les-Bains</option>
+        <option value="Evian-les-Bains">Évian-les-Bains</option>
         <option value="Amphion-les-Bains">Amphion-les-Bains</option>
         <option value="Sciez">Sciez</option>
         <option value="Douvaine">Douvaine</option>
@@ -104,22 +104,22 @@ const ServiceModal = ({ isOpen, onRequestClose, onServiceSelect }) => {
 
       <ServiceOption onClick={() => handleServiceSelect({ service: 'Delivery', location })}>
         <TruckDelivery />
-        Delivery to your home
+        Livraison
       </ServiceOption>
       <ServiceOption onClick={() => handleServiceSelect({ service: 'Pickup', location })}>
         <DriveIcon />
-        Pickup from store
+        Drive
       </ServiceOption>
       <ServiceOption onClick={() => handleServiceSelect({ service: 'In-House', location })}>
         <TruckIcon />
-        In-house service
+        Livraison express
       </ServiceOption>
 
       <DatePicker
         selected={dateTime}
         onChange={(date) => setDateTime(date)}
         dateFormat="dd/MM/yyyy"
-        placeholderText="Select a date"
+        placeholderText="Sélectionnez une date"
       />
       <input
         type="time"
@@ -128,9 +128,9 @@ const ServiceModal = ({ isOpen, onRequestClose, onServiceSelect }) => {
       />
 
       <Button onClick={() => handleServiceSelect({ service: 'Delivery', location })}>
-        Confirm Service
+        Confirmer le service
       </Button>
-      <Button onClick={onRequestClose}>Close</Button>
+      <Button onClick={onRequestClose}>Fermer</Button>
     </StyledModal>
   );
 };

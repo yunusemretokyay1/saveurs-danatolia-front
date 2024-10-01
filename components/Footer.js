@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import Link from "next/link";
+import Link from 'next/link';
 import { Logo as LogoComponent } from "@/components/Logo/Logo";
 
 const FooterWrapper = styled.footer`
@@ -79,20 +79,6 @@ export default function Footer() {
   return (
     <FooterWrapper>
       <FooterContainer>
-        <FooterSection>
-          <FooterLink href="/">Home</FooterLink>
-          <FooterLink href="/about">About Us</FooterLink>
-          <FooterLink href="/categories">Categories</FooterLink>
-          <FooterLink href="/account">Account</FooterLink>
-          <FooterLink href="/cart">Cart</FooterLink>
-        </FooterSection>
-
-        <FooterSection>
-          <Logo href="/" passHref>
-            <LogoComponent>Logo</LogoComponent>
-          </Logo>
-
-        </FooterSection>
 
         <FooterSection>
           <h3>Contact</h3>

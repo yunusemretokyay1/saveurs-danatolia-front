@@ -17,9 +17,9 @@ export default async function handler(req, res) {
     streetAddress,
     country,
     cartProducts,
-    service,  // Selected service
-    location, // Location
-    dateTime, // Date and time
+    service,
+    location,
+    dateTime,
   } = req.body;
 
   await mongooseConnect();
@@ -31,9 +31,9 @@ export default async function handler(req, res) {
 
     let line_items = [];
     let total = 0;
-    const shippingCost = 500; // Assume this is a constant shipping cost
+    const shippingCost = 500;
 
-    // Fetch the shipping limit and service charge from the database
+
     const settings = await Settings.findOne();
     const shippingLimit = settings.shippingLimit || 0;
     const serviceCharge = settings.serviceCharge || 0;

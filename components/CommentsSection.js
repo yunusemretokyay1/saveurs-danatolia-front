@@ -78,7 +78,7 @@ const CommentsSection = ({ productId, comments }) => {
             <InputWrapper>
                 <Input
                     rows={4}
-                    placeholder="Write your comment..."
+                    placeholder="Ecrivez votre comment..."
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                 />

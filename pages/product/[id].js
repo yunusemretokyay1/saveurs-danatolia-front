@@ -108,7 +108,7 @@ export default function ProductPage({ product, comments }) {
                   onChange={handleQuantityChange}
                 />
                 <Button primary outline onClick={() => addProduct(product._id, quantity)}>
-                  <CartIcon /> Add to cart
+                  <CartIcon /> Ajouter au Panier
                 </Button>
               </div>
             </PriceRow>

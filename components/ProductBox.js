@@ -109,7 +109,7 @@ export default function ProductBox({ _id, title, price, images }) {
         <PriceRow>
           <Price>€{price}</Price>
           <Button block onClick={() => addProduct(_id)} primary outline>
-            <CartIcon /> Add to cart
+            <CartIcon /> Ajouter panier
           </Button>
         </PriceRow>
       </ProductInfoBox>
